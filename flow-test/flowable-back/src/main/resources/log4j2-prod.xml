@@ -1,0 +1,40 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN">
+    <Properties>
+        <Property name="LOG_PATH">logs</Property>
+        <Property name="LOG_EXCEPTION_CONVERSION_WORD">%xwEx</Property>
+        <Property name="LOG_LEVEL_PATTERN">%5p</Property>
+        <Property name="FILE_LOG_PATTERN">%d{yyyy-MM-dd HH:mm:ss.SSS} ${LOG_LEVEL_PATTERN} ${sys:PID} --- [%t] %-40.40c{1.} : %m%n${sys:LOG_EXCEPTION_CONVERSION_WORD}</Property>
+    </Properties>
+    <Appenders>
+        <RollingFile name="File" fileName="${sys:LOG_PATH}/server.log" filePattern="${sys:LOG_PATH}/server-%d{yyyy-MM-dd}-%i.log.gz">
+            <PatternLayout>
+                <Pattern>${sys:FILE_LOG_PATTERN}</Pattern>
+            </PatternLayout>
+            <!--策略-->
+            <Policies>
+                <!--开启分割日志，分割日志文件命名规则由上面filePattern属性中i配置-->
+                <TimeBasedTriggeringPolicy modulate="true" interval="1"/>
+                <!--按大小分日志，每份日志大小-->
+                <SizeBasedTriggeringPolicy size="50MB" />
+            </Policies>
+            <!--日志分割最大份数，指的是上面i的最大值，超过了就会覆盖之前的-->
+            <DefaultRolloverStrategy max="100">
+                <!--删除策略-->
+                <Delete basePath="${baseDir}" maxDepth="2">
+                    <IfFileName glob="*/server-*.log.gz" />
+                    <!--超过7天没有修改-->
+                    <IfLastModified age="7d" />
+                </Delete>
+            </DefaultRolloverStrategy>
+        </RollingFile>
+        <Async name="Async">
+            <AppenderRef ref="File"/>
+        </Async>
+    </Appenders>
+    <Loggers>
+        <Root level="info">
+            <AppenderRef ref="Async" />
+        </Root>
+    </Loggers>
+</Configuration>

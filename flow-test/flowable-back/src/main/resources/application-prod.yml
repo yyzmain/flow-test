@@ -1,0 +1,49 @@
+# 根路径配置
+server:
+  port: 9000
+  servlet:
+    context-path: /${spring.application.name}
+  # undertow配置
+  # 设置IO线程数, 它主要执行非阻塞的任务,它们会负责多个连接, 默认设置每个CPU核心一个线程
+  undertow:
+    io-threads: 4
+  # 阻塞任务线程池, 当执行类似servlet请求阻塞操作, undertow会从这个线程池中取得线程,它的值设置取决于系统的负载
+    worker-threads: 20
+  # 以下的配置会影响buffer,这些buffer会用于服务器连接的IO操作,有点类似netty的池化内存管理
+  # 每块buffer的空间大小,越小的空间被利用越充分
+    buffer-size: 1024
+  # 每个区分配的buffer数量 , 所以pool的大小是buffer-size * buffers-per-region
+#    buffers-per-region: 1024
+  # 是否分配的直接内存
+    direct-buffers: true
+
+# 监控点端口
+management:
+  server:
+    port: 6000
+    servlet:
+      context-path: /
+  endpoint:
+    health:
+      show-details: always
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+
+spring:
+  # redis 地址
+  redis:
+    host: 10.1.8.121
+    port: 6379
+    password: bs_mc!am
+  # 数据库地址
+  datasource:
+    # driver-class-name: com.mysql.jdbc.Driver 非必填，可以根据url推断
+#    url: jdbc:mysql://address=(protocol=tcp)(host=2001:470:23:13::6)(port=3306)/database?useSSL=false&useUnicode=true&characterEncoding=UTF-8
+    url: jdbc:mysql://localhost:3306/newmonitor?useSSL=false&useUnicode=true&characterEncoding=UTF-8
+    username: root
+    password:
+
+logging:
+  config: classpath:log4j2-prod.xml

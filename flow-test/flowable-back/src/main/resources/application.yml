@@ -1,0 +1,149 @@
+spring:
+  profiles:
+    active: dev
+  application:
+    name: flowable-back
+  mvc:
+    servlet:
+      load-on-startup: 1
+    date-format: yyyy-MM-dd HH:mm:ss # 配置请求的String类型转Date类型 FIXME 定义默认的时间转换格式
+  jackson:
+      date-format: yyyy-MM-dd HH:mm:ss #配置Date类型返回时的时间格式，否则会返回long FIXME 定义默认的时间返回格式
+      time-zone: GMT+8 #设置Date类型的时区
+  # 文件上传配置
+  servlet:
+    multipart:
+      enabled: true   # 启用http上传处理
+      max-file-size: 100MB # 设置单个文件的最大长度
+      max-request-size: 100MB # 设置最大的请求文件的大小
+      file-size-threshold: 1MB  # 当上传文件达到1MB的时候进行磁盘写入
+      location:  # 上传的临时目录
+  thymeleaf:
+    prefix: classpath:/templates/
+    suffix: .html
+    encoding: UTF-8
+    mode: HTML5
+    cache: false
+    servlet:
+      content-type: text/html
+  # redis配置
+  redis:
+    database: 1
+    timeout: 1000
+    jedis:
+      pool:
+        max-active: 20
+        max-idle: 8
+        min-idle: 0
+  datasource:
+    # 阿里 druid 数据源配置
+    druid:
+      initial-size: 5
+      min-idle: 3
+      max-active: 10
+      max-wait: 60000
+      time-between-eviction-runs-millis: 60000
+      min-evictable-idle-time-millis: 1800000 #最小空闲时间
+      max-evictable-idle-time-millis: 3600000 #最大空闲时间
+      validation-query: SELECT 1 FROM DUAL
+      test-while-idle: true
+      test-on-borrow: false
+      test-on-return: false
+      pool-prepared-statements: true
+      max-pool-prepared-statement-per-connection-size: 20
+      filters: stat,wall,slf4j
+      connection-properties: druid.stat.mergeSql=true;druid.stat.slowSqlMillis=5000
+      validation-query-timeout: 10000
+      web-stat-filter: # WebStatFilter配置，说明请参考Druid Wiki，配置_配置WebStatFilter
+        enabled: true #是否启用StatFilter默认值true
+        url-pattern: /*
+        exclusions: /druid/*,*.js,*.gif,*.jpg,*.png,*.css,*.ico
+        session-stat-enable: true #开启session统计
+        #session-stat-max-count: 1000
+        #principal-session-name:
+        #principal-cookie-name:
+        profile-enable: true # 监控单个url调用的sql列表
+      stat-view-servlet:  # StatViewServlet配置(统计界面)，说明请参考Druid Wiki，配置_StatViewServlet配置
+        enabled: true #是否启用StatViewServlet默认值true
+        url-pattern: /druid/*
+        reset-enable: true
+  # security basic安全认证
+  security:
+    user:
+      name: bomc
+      password: bs_mc!am
+        #访问控制,不配置，统一由security控制
+        #login-username:
+        #login-password:
+        #allow:
+        #deny:
+      # Spring监控配置，说明请参考Druid Github Wiki，配置_Druid和Spring关联监控配置
+      # aop-patterns: com.sxj.lottery.mapper.* # Spring监控AOP切入点，如x.y.z.service.*,配置多个英文逗号分隔
+      # 如果spring.datasource.druid.aop-patterns要代理的类没有定义interface请设置spring.aop.proxy-target-class=true
+
+
+mybatis:
+#  type-aliases-package: com.newland.bomc.open.user.*
+  mapper-locations: mapper/*/*.xml, classpath*:mapper/*.xml
+  configuration:
+    map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+pagehelper:
+  reasonable: true
+
+
+feign:
+  hystrix:
+    enabled: true #启用断路器
+  compression:
+    request:
+      enabled: true # gzip压缩
+    response:
+      enabled: true # gizp压缩
+  client:
+    config:
+      default:  #服务名，填写default为所有服务
+        connectTimeout: 50000
+        readTimeout: 50000
+#        loggerLevel: full
+#        errorDecoder: com.example.SimpleErrorDecoder
+#        retryer: com.example.SimpleRetryer
+#        requestInterceptors:
+#          - com.example.FooRequestInterceptor
+#          - com.example.BarRequestInterceptor
+#        decode404: false
+#        encoder: com.example.SimpleEncoder
+#        decoder: com.example.SimpleDecoder
+#        contract: com.example.SimpleContract
+
+# 设置；链接超时时长为5秒，超出5秒，熔断器生效，配合ribbon使用
+hystrix:
+  threadpool:
+    default:
+      coreSize: 1000 #并发执行的最大线程数，默认10
+      maxQueueSize: 1000 #BlockingQueue的最大队列数
+      queueSizeRejectionThreshold: 500 #即使maxQueueSize没有达到，达到queueSizeRejectionThreshold该值后，请求也会被拒绝
+  command:
+    default:
+      execution:
+        isolation:
+          thread:
+            timeoutInMilliseconds: 160000 #断路器的触发时间 要大于(ribbon.ReadTimeout+ribbon.ConnectTimeout)*(ribbon.MaxAutoRetries+1)*(ribbion.MaxAutoRetriesNextServer+1)
+
+# FIXME  设置服务负载请求超时时长(根据业务需求设置时间长度)，以及重新请求间隔
+ribbon:
+  ReadTimeout: 30000
+  ConnectTimeout: 10000
+  MaxAutoRetries: 1 # 当前重试次数，这里配置1，就是重试1次，总共2此
+  MaxAutoRetriesNextServer: 1 #
+  OkToRetryOnAllOperations: false
+
+# eureka配置
+eureka:
+  healthcheck:
+    enabled: true
+  instance:
+    prefer-ip-address: true
+    instance-id: ${spring.cloud.client.ip-address}:${server.port}${server.servlet.context-path}
+    leaseRenewalIntervalInSeconds: 20
+    leaseExpirationDurationInSeconds: 60

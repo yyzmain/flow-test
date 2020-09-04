@@ -1,0 +1,13 @@
+#spring:
+#  cloud:
+#    consul:
+#      discovery:
+#        tags: version=1.0,author=linds
+#        health-check-interval: 5s
+#        instanceId: ${spring.application.name}:${spring.cloud.client.ip-address}:${server.port}
+#        prefer-ip-address: true
+#        heartbeat:
+#          enabled: true
+#      host: 10.1.8.138  #consul注册地址，只允许单个ip
+#      port: 8500        #consul注册端口，默认8500
+#      enabled: false  # 是否开启consul服务注册发现
